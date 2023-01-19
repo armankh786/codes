@@ -1,0 +1,255 @@
+<h4> 1 a desciptive analysis</h2><br>
+import pandas as pd<br>
+d={'Age': pd.Series([25,25,26,27,28,34,32,35,335,31]),<br>
+   'rating':pd.Series([4.30,4.20,3.09,4.08,4.06,2.0,1.0,3.0,5.0,1.20])}<br>
+df=pd.DataFrame(d)<br>
+print(df)<br>
+print("sum ",df.sum())<br>
+print("mean ",df.mean())<br>
+print("std ",df.std())<br>
+print("descriptive analysis",df.describe())<br>
+----------------------------------------------<br>
+<h4> 1 b import data frtom differnet data sources </h4><br>
+import sqlite3 as sq<br>
+import pandas as pd<br>
+<br>
+databaseName=r"C:\Users\karan\Desktop\RIC PRACTS\Vermeulen.db"<br>
+conn=sq.connect(databaseName)<br>
+<br>
+input=r"C:\Users\karan\Desktop\RIC PRACTS\Retrieve_IP_DATA.csv"<br>
+print("loading",input)<br>
+<br>
+inputfile=pd.read_csv(input,header=0,low_memory=False)<br>
+inputfile.index.names=['ROWIDCSV']<br>
+table='IP_DATA'<br>
+inputfile.to_sql(table,conn,if_exists="replace")<br>
+testdata=pd.read_sql_query("select * from IP_DATA;",conn)<br>
+print(testdata)<br>
+print("Data profile")<br>
+print("ROws  :",testdata.shape[0])<br>
+print("columns",testdata.shape[1])<br>
+--------------------------------------------------<br>
+<h4> perform hypothesis using one sample t-test : </h4><br>
+from scipy.stats import ttest_1samp<br>
+import numpy as np<br>
+import pandas as pd<br>
+input=r"C:\Users\karan\Desktop\RIC PRACTS\ages.csv"<br>
+ages=pd.read_csv(input,header=0)<br>
+<br>
+print("Mean is : ",ages.mean())<br>
+tset,pval=ttest_1samp(ages,30)<br>
+print("p-value - ",pval)<br>
+if pval<0.05:<br>
+    print("we are rejecting null hypo..")<br>
+else:<br>
+    print("we accept null hpyo..")<br>
+------------------------------------------------------<br>
+<h4> perform hypothesis using two sample t-test : </h4><br>
+import numpy as np<br>
+from scipy import stats<br>
+from numpy.random import randn<br>
+N = 20<br>
+#a = [35,40,12,15,21,14,46,10,28,48,16,30, 32,48,31,22,12,39,19,25]<br>
+#b = [2,27,31,38,1,19,1,34,3,1,2,1,3,1,2,1,3,29,37,2]<br>
+a = 5 * randn(100) + 50<br>
+b = 5 * randn(100) + 51<br>
+var_a = a.var(ddof=1)<br>
+var_b = b.var(ddof=1)<br>
+s = np.sqrt((var_a + var_b)/2)<br>
+t = (a.mean() - b.mean())/(s*np.sqrt(2/N))<br>
+df = 2*N - 2<br>
+#p-value after comparison with the t<br>
+p = 1 - stats.t.cdf(t,df=df)<br>
+print("t = " + str(t))<br>
+print("p = " + str(2*p))<br>
+if t> p :<br>
+print('Mean of two distribution are differnt and significant')<br>
+else:<br>
+print('Mean of two distribution are same and not significant')<br>
+--------------------------------------<br>
+<br>
+<h4>Chi test</h4><br>
+<br>
+import numpy as np<br>
+import pandas as pd<br>
+import scipy.stats as stats<br>
+<br>
+np.random.seed(10)<br>
+stud_grade = np.random.choice(<br>
+    a=["O", "A", "B", "C", "D"], p=[0.20, 0.20, 0.20, 0.20, 0.20], size=100<br>
+)<br>
+stud_gen = np.random.choice(a=["Male", "Female"], p=[0.5, 0.5], size=100)<br>
+mscpart1 = pd.DataFrame({"Grades": stud_grade, "Gender": stud_gen})<br>
+print(mscpart1)<br>
+stud_tab = pd.crosstab(mscpart1.Grades, mscpart1.Gender, margins=True)<br>
+stud_tab.columns = ["Male", "Female", "row_totals"]<br>
+stud_tab.index = ["O", "A", "B", "C", "D", "col_totals"]<br>
+observed = stud_tab.iloc[0:5, 0:2]<br>
+print(observed)<br>
+expected = np.outer(stud_tab["row_totals"][0:5], stud_tab.loc["col_totals"][0:2]) / 100<br>
+print(expected)<br>
+chi_squared_stat = (((observed - expected) ** 2) / expected).sum().sum()<br>
+print("Calculated : ", chi_squared_stat)<br>
+crit = stats.chi2.ppf(q=0.95, df=4)<br>
+print("Table Value : ", crit)<br>
+if chi_squared_stat >= crit:<br>
+    print("H0 is Accepted ")<br>
+else:<br>
+    print("H0 is Rejected ")<br>
+---------------------------------------------------------------------------<br>
+<h4>perform testing of hypothesis using Z-test</h4><br>
+from statsmodels.stats import weightstats as stests<br>
+import pandas as pd<br>
+from scipy import stats<br>
+input = r"C:\Users\arman\Downloads\blood_pressure (1).csv"<br>
+df = pd.read_csv(input,header=0)<br>
+print(df.describe())<br>
+ztest,pval=stests.ztest(df['bp_before'],x2=None,value=156)<br>
+if pval <0.05:<br>
+    print("reject null hypothesis")<br>
+else:<br>
+    print("accept null hypothesis")<br>
+print(ztest)<br>
+-------------------------------------------------------------------<br>
+<h4>hypothesis using sample z-test</h4><br>
+from statsmodels.stats import weightstats as stests<br>
+import pandas as pd<br>
+from scipy import stats<br>
+input = r"C:\Users\arman\Downloads\blood_pressure (1).csv"<br>
+df = pd.read_csv(input,header=0)<br>
+df[['bp_before','bp_after']].describe()<br>
+ztest,pval=stests.ztest(df['bp_before'],x2=df['bp_after'],value=0)<br>
+if pval <0.05:<br>
+    print("reject null hypothesis")<br>
+else:<br>
+    print("accept null hypothesis")<br>
+print(ztest)<br>
+--------------------------------<br>
+<h4>one way anova</h4><br>
+<br>
+One way ANOVA<br>
+<br>
+<br>
+import pandas as pd<br>
+import numpy as np<br>
+import matplotlib.pyplot as plt<br>
+import seaborn as sns<br>
+from scipy import stats<br>
+data = pd.read_csv("scores.csv")<br>
+data.head()<br>
+data['Borough'].value_counts()<br>
+data['total_score'] = data['Average Score (SAT Reading)'] + \<br>
+data['Average Score (SAT Math)'] + \<br>
+data['Average Score (SAT Writing)']<br>
+data = data[['Borough', 'total_score']].dropna()<br>
+x = ['Brooklyn', 'Bronx', 'Manhattan', 'Queens', 'Staten Island']<br>
+district_dict = {}<br>
+#Assigns each test score series to a dictionary key<br>
+for district in x:<br>
+  district_dict[district] = data[data['Borough'] == district]['total_score']<br>
+  y = []<br>
+  yerror = []<br>
+#Assigns the mean score and 95% confidence limit to each district<br>
+for district in x:<br>
+  y.append(district_dict[district].mean())<br>
+  yerror.append(1.96*district_dict[district].std()/np.sqrt(district_dict[district].shape[0]))<br>
+  print(district + '_std : {}'.format(district_dict[district].std()))<br>
+  sns.set(font_scale=1.8)<br>
+  fig = plt.figure(figsize=(10,5))<br>
+ax = sns.barplot(x, y, yerr=yerror)<br>
+ax.set_ylabel('Average Total SAT Score')<br>
+plt.show()<br>
+###################### Perform 1-way ANOVA<br>
+print(stats.f_oneway(<br>
+district_dict['Brooklyn'], district_dict['Bronx'], \<br>
+district_dict['Manhattan'], district_dict['Queens'], \<br>
+district_dict['Staten Island']<br>
+))<br>
+districts = ['Brooklyn', 'Bronx', 'Manhattan', 'Queens', 'Staten Island']<br>
+ss_b = 0<br>
+for d in districts:<br>
+  ss_b += district_dict[d].shape[0] * \<br>
+np.sum((district_dict[d].mean() - data['total_score'].mean())**2)<br>
+ss_w = 0<br>
+for d in districts:<br>
+  ss_w += np.sum((district_dict[d] - district_dict[d].mean())**2)<br>
+  msb = ss_b/4<br>
+  msw = ss_w/(len(data)-5)<br>
+  f=msb/msw<br>
+  print('F_statistic: {}'.format(f))<br>
+ss_t = np.sum((data['total_score']-data['total_score'].mean())**2)<br>
+eta_squared = ss_b/ss_t<br>
+print('eta_squared: {}'.format(eta_squared))<br>
+<br>
+----------------<br>
+<h4>Manova</h4><br>
+MANOVA<br>
+<br>
+import pandas as pd<br>
+from statsmodels.multivariate.manova import MANOVA<br>
+df = pd.read_csv('Iris.csv', index_col=0)<br>
+df.columns = df.columns.str.replace(".", "_")<br>
+df.head()<br>
+print('~~~~~~~~ Data Set ~~~~~~~~')<br>
+print(df)<br>
+maov = MANOVA.from_formula('SepalLengthCm + SepalWidthCm + \<br>
+PetalLengthCm + PetalWidthCm ~ Species', data=df)<br>
+print('~~~~~~~~ MANOVA Test Result ~~~~~~~~')<br>
+print(maov.mv_test())<br>
+<br>
+-------------------------------------<br>
+<h4>correlation</h4><br>
+Correlation<br>
+<br>
+#8.Write a program for computing different correlation<br>
+#A.	Positive Correlation:<br>
+import numpy as np<br>
+import matplotlib.pyplot as plt<br>
+np.random.seed(1)<br>
+# 1000 random integers between 0 and 50<br>
+x = np.random.randint(0, 50, 1000)<br>
+# Positive Correlation with some noise<br>
+y = x + np.random.normal(0, 10, 1000)<br>
+np.corrcoef(x, y)<br>
+matplotlib.style.use('ggplot')<br>
+plt.scatter(x, y)<br>
+plt.show()<br>
+<br>
+<br>
+--------------------------------------------------------------------<br>
+# Google colab<br>
+#8.Write a program for computing different correlation<br>
+#B.	Negative Correlation: <br>
+import numpy as np<br>
+import matplotlib.pyplot as plt<br>
+np.random.seed(1)<br>
+# 1000 random integers between 0 and 50<br>
+x = np.random.randint(0, 50, 1000)<br>
+# Negative Correlation with some noise<br>
+y = 100 - x + np.random.normal(0, 5, 1000)<br>
+np.corrcoef(x, y)<br>
+plt.scatter(x, y)<br>
+plt.show()<br>
+<br>
+print("Practical 8-B")<br>
+<br>
+<br>
+<br>
+--------------------------------------------------------------------<br>
+# Google colab<br>
+#8.Write a program for computing different correlation<br>
+#C.	No/Weak Correlation:<br>
+import numpy as np<br>
+import matplotlib.pyplot as plt<br>
+np.random.seed(1)<br>
+x = np.random.randint(0, 50, 1000)<br>
+y = np.random.randint(0, 50, 1000)<br>
+np.corrcoef(x, y)<br>
+plt.scatter(x, y)<br>
+plt.show()<br>
+<br>
+print("Practical 8-C")<br>
+<br>
+<br>
+                    <br>
+<br>
